@@ -193,28 +193,28 @@ def FilterCompilePrj():
 #生成IOS的ipa包
 def PackIos(prj, app_name, target_path, version_name):
     print "##############开始生成IPA##############"
-    build_dir="%s%s/ios/build/Debug-iphoneos/"%(TARGET_PATH, prj)
-    print build_dir  
+    # build_dir="%s%s/ios/build/Debug-iphoneos/"%(TARGET_PATH, prj)
+    # print build_dir  
 
-    cmd="cd %s; rm -rf Payload; mkdir Payload; cp -r %s.app Payload/; zip -r %s.ipa Payload; "%(build_dir, prj, app_name)
-    ret=os.system(cmd)
-    CheckRet(ret, "项目【%s】打包失败"%prj)
+    # cmd="cd %s; rm -rf Payload; mkdir Payload; cp -r %s.app Payload/; zip -r %s.ipa Payload; "%(build_dir, prj, app_name)
+    # ret=os.system(cmd)
+    # CheckRet(ret, "项目【%s】打包失败"%prj)
     
-    cmd="cd %s; rm -rf %s.app.dSYM.zip; zip -r %s.app.dSYM.zip %s.app.dSYM; "%(build_dir, app_name, app_name, prj)
-    ret=os.system(cmd)
-    CheckRet(ret, "项目【%s】打包失败"%prj)
+    # cmd="cd %s; rm -rf %s.app.dSYM.zip; zip -r %s.app.dSYM.zip %s.app.dSYM; "%(build_dir, app_name, app_name, prj)
+    # ret=os.system(cmd)
+    # CheckRet(ret, "项目【%s】打包失败"%prj)
     
-    cmd="mkdir -p %s/; "%(target_path)
-    ret=os.system(cmd)
-    CheckRet(ret, "项目【%s】打包失败"%prj)
+    # cmd="mkdir -p %s/; "%(target_path)
+    # ret=os.system(cmd)
+    # CheckRet(ret, "项目【%s】打包失败"%prj)
     
-    cmd="cd %s; mv -v %s.ipa %s/; "%(build_dir, app_name, target_path)
-    ret=os.system(cmd)
-    CheckRet(ret, "项目【%s】打包失败"%prj)
+    # cmd="cd %s; mv -v %s.ipa %s/; "%(build_dir, app_name, target_path)
+    # ret=os.system(cmd)
+    # CheckRet(ret, "项目【%s】打包失败"%prj)
 
-    cmd="cd %s; mv -v %s.app.dSYM.zip %s/; "%(build_dir, app_name, target_path)
-    ret=os.system(cmd)
-    CheckRet(ret, "项目【%s】打包失败"%prj)
+    # cmd="cd %s; mv -v %s.app.dSYM.zip %s/; "%(build_dir, app_name, target_path)
+    # ret=os.system(cmd)
+    # CheckRet(ret, "项目【%s】打包失败"%prj)
     print "##############结束生成IPA##############"
     pass
 
@@ -325,19 +325,19 @@ def CompilePrjIos():
         #只编译生成bundlejs包
         if not g_args_dict["onlybundlejs"] == True:
             #清理项目
-            # if not g_args_dict["buildonly"] and not g_args_dict["buildpack"] :
-            #     ret=os.system("xcodebuild -project %s%s/ios/%s.xcodeproj -configuration Debug clean"%(TARGET_PATH, prj, prj))
-            #     CheckRet(ret, "project[%s] clean 失败"%prj)
+            if not g_args_dict["buildonly"] and not g_args_dict["buildpack"] :
+                ret=os.system("xcodebuild -project %s%s/ios/%s.xcodeproj -configuration -alltargets Debug clean "%(TARGET_PATH, prj, prj))
+                CheckRet(ret, "project[%s] clean 失败"%prj)
                 
-            #     if g_args_dict["cleanonly"] == True:
-            #         print "项目【%s】清理完成"%(prj)
-            #         continue
-            #     pass
-            # pass
+                if g_args_dict["cleanonly"] == True:
+                    print "项目【%s】清理完成"%(prj)
+                    continue
+                pass
+            pass
 
             #开始编译项目
-            print ("xcodebuild -project %s%s/ios/%s.xcodeproj -configuration Debug build -sdk iphoneos"%(TARGET_PATH, prj, prj))
-            ret=os.system("xcodebuild -archive %s%s/ios/%s.xcodeproj -configuration Debug build -sdk iphoneos"%(TARGET_PATH, prj, prj))
+            print ("xcodebuild archive %s%s/ios/%s.xcodeproj -scheme %s -destination generic/platform=iOS -archivePath %s.xcarchive"%(TARGET_PATH, prj, prj, prj, prj))
+            ret=os.system("xcodebuild archive -project %s%s/ios/%s.xcodeproj -scheme %s -destination generic/platform=iOS -archivePath %s.xcarchive"%(TARGET_PATH, prj, prj, prj, prj))
             CheckRet(ret, "project[%s] build 失败"%prj)
 
             #开始打包app
