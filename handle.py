@@ -193,6 +193,13 @@ def FilterCompilePrj():
 #生成IOS的ipa包
 def PackIos(prj, app_name, target_path, version_name):
     print "##############开始生成IPA##############"
+
+    build_dir="%s%s/ios/"%(TARGET_PATH, prj)
+    PROFILE_NAME="adhoctag20140813"
+    print build_dir  
+    ret=os.system("xcodebuild -exportArchive -archivePath %s%s.xcarchive -exportPath %s -exportFormat ipa -exportProvisioningProfile %s -verbose"%(build_dir, prj, prj, PROFILE_NAME))
+    CheckRet(ret, "project[%s] pack 失败"%prj)
+    
     # build_dir="%s%s/ios/build/Debug-iphoneos/"%(TARGET_PATH, prj)
     # print build_dir  
 
@@ -336,8 +343,8 @@ def CompilePrjIos():
             pass
 
             #开始编译项目
-            print ("xcodebuild archive %s%s/ios/%s.xcodeproj -scheme %s -destination generic/platform=iOS -archivePath %s.xcarchive"%(TARGET_PATH, prj, prj, prj, prj))
-            ret=os.system("xcodebuild archive -project %s%s/ios/%s.xcodeproj -scheme %s -destination generic/platform=iOS -archivePath %s.xcarchive"%(TARGET_PATH, prj, prj, prj, prj))
+            tmp_prj_path="%s%s/ios/"%(TARGET_PATH, prj)
+            ret=os.system("xcodebuild archive -project %s/%s.xcodeproj -scheme %s -destination generic/platform=iOS -archivePath %s/%s.xcarchive"%(tmp_prj_path, prj, prj, tmp_prj_path, prj))
             CheckRet(ret, "project[%s] build 失败"%prj)
 
             #开始打包app
