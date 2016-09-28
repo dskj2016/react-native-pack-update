@@ -1,0 +1,19 @@
+{
+    "apps": [{
+        "name": "react-native-pack-update",
+        "script": "bin/www",
+        "instances": "1",
+        "node_args"  : "--harmony",
+        "log_file"   : "logs/app1.log",
+        "error_file" : "logs/app1-err.log",
+        "out_file"   : "logs/app1-out.log",
+        "log_date_format"  : "YYYY-MM-DD HH:mm:SS",
+        "exec_mode": "fork_mode",
+        "max_memory_restart": 314572800,
+        "watch": true,
+        "ignore_watch": ["node_modules"],
+        "env": {
+            "NODE_ENV": "development",
+        }
+    }]
+}

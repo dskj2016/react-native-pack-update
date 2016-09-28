@@ -4,17 +4,18 @@
 import sys,os
 from hashlib import md5
 from optparse import OptionParser
+from distutils.version import LooseVersion
 
 #定义一些常量
 #用于过滤项目的标志
 FLAG_FILE_NAME="index.android.js"
 
 #编译目标目录
-TARGET_PATH="~/projects/client_dasheng/cilent/trunk/"
+TARGET_PATH="~//projects/"
 TARGET_PATH=os.path.expanduser(TARGET_PATH)
 
 #生成目标目录
-DEST_PATH="~/projects/TestHotUpdate/public"
+DEST_PATH="~/projects/react-native-pack-update/public"
 DEST_PATH=os.path.expanduser(DEST_PATH)
 
 #切换到文件所在目录
@@ -71,6 +72,41 @@ def Md5File(name):
     m.update(fd.read())
     fd.close()
     return m.hexdigest()
+    pass
+
+#svn 命令处理
+def HandleSvn(svn_type, path, msg=None, newpath=None, version=None, src_path=None):
+    if svn_type=="svn up":
+        os.system("svn up %s "%path)
+        pass
+    elif svn_type=="svn ci":
+        os.system("svn ci %s -m'%s'"%(path,msg))
+        pass
+    elif svn_type=="svn di":
+        os.system("svn di %s "%path)
+        pass
+    elif svn_type=="svn export":
+        os.system("svn export --force %s %s"%(path,newpath))
+        pass
+    elif svn_type=="svn revert":
+        os.system("svn revert %s -R"%(path))
+        pass
+    elif svn_type=="svn sw":
+        os.system("svn sw %s %s"%(newpath,path))
+        pass
+    elif svn_type=="svn st":
+        os.system("svn st --ignore-externals %s"%(path))
+        pass
+    # elif svn_type=="svn list":
+    #     return commands.getstatusoutput("svn list %s"%(path))
+    #elif svn_type=="svn log":
+    #   return commands.getstatusoutput("svn log %s --stop-on-copy --incremental -q "%(path))
+    elif svn_type=="svn merge":
+        return os.system("svn merge -c %s %s %s"%(str(version), src_path, path))
+    elif svn_type=="svn info":
+        return os.popen("svn info %s"%path).readlines()
+    elif svn_type=="svn cp":
+        os.system("svn cp %s/trunk %s/tag/%s -m'%s'"%(GLOBAL_SVN_URL,GLOBAL_SVN_URL,newpath,msg))
     pass
 
 # 解析命令参数
@@ -264,7 +300,7 @@ def PackBundleJs(prj, app_version, platform):
     print "##############开始[%s]生成bundlejs文件##############"%platform
     tmp_target_path=("%s/package/%s/%s/%s/"%(DEST_PATH, prj, platform, app_version))
     #生成bundle包目录
-    tmp_des_bundle_path=("%sdiff/"%(tmp_target_path))
+    tmp_des_bundle_path=("%sbundle/"%(tmp_target_path))
     print tmp_des_bundle_path
     CheckAndCreateDir(tmp_des_bundle_path)
     #删除生成的临时包
@@ -272,6 +308,7 @@ def PackBundleJs(prj, app_version, platform):
     ret=os.system(cmd)
     CheckRet(ret, "打BundleJs包失败")
 
+    
     #获取已经生成最高版本号
     tmp_bunlde_ver_list=[]
     for v in os.listdir(tmp_des_bundle_path):
@@ -279,10 +316,18 @@ def PackBundleJs(prj, app_version, platform):
             tmp_bunlde_ver_list.append(v)
             pass
         pass
-    tmp_bunlde_ver_list.sort(reverse=True)
+
+    #版本号排序
+    def comp(x, y):
+        return cmp(LooseVersion(y), LooseVersion(x)) 
+    tmp_bunlde_ver_list.sort(comp)
+
+    #生成的平台bundlejs名称
+    tmp_platform_bundle_name="index.%s.bundle"%platform
 
     #打android js 包
-    cmd="cd %s%s; react-native bundle —minify --entry-file index.%s.js  --platform %s  --dev false --bundle-output %s/tmp/index.%s.bundle"%(TARGET_PATH, prj, platform, platform, tmp_target_path, platform)
+    cmd="cd %s%s; react-native bundle —minify --entry-file index.%s.js  --platform %s  --dev false --bundle-output %s/tmp/%s"%(TARGET_PATH, prj, platform, platform, tmp_target_path, tmp_platform_bundle_name)
+    print cmd
     ret=os.system(cmd)
     CheckRet(ret, "打BundleJs包失败")
     
@@ -290,8 +335,8 @@ def PackBundleJs(prj, app_version, platform):
     tmp_new_bundle_ver="1.0.0"
     #用最新生成的包的md5码对比已经生成的最高版本号
     if(len(tmp_bunlde_ver_list) != 0) :
-        tmp_new_bundle_md5=Md5File("%s/tmp/index.%s.bundle"%(tmp_target_path, platform))
-        last_bundle_md5=Md5File("%s/%s/index.%s.bundle"%(tmp_des_bundle_path, tmp_bunlde_ver_list[0], platform))
+        tmp_new_bundle_md5=Md5File("%s/tmp/%s"%(tmp_target_path, tmp_platform_bundle_name))
+        last_bundle_md5=Md5File("%s/%s/%s"%(tmp_des_bundle_path, tmp_bunlde_ver_list[0], tmp_platform_bundle_name))
         #不相等时，创建新bundle版本号
         if(tmp_new_bundle_md5!=last_bundle_md5) :
             tmp_last_ver_list=tmp_bunlde_ver_list[0].split('.');
@@ -301,7 +346,7 @@ def PackBundleJs(prj, app_version, platform):
             tmp_new_bundle_ver='.'.join(tmp_last_ver_list)
             pass
         else: 
-            print "##############版本号为[%s]的index.%s.bundle已经是最新##############"%(tmp_bunlde_ver_list[0], platform)
+            print "##############版本号为[%s]的%s已经是最新##############"%(tmp_bunlde_ver_list[0], tmp_platform_bundle_name)
             return
             pass
         pass
@@ -309,13 +354,15 @@ def PackBundleJs(prj, app_version, platform):
     tmp_new_bundle_ver_path="%s%s"%(tmp_des_bundle_path, tmp_new_bundle_ver)
 
     CheckAndCreateDir(tmp_new_bundle_ver_path)
-    cmd="cd %s; mv -v tmp/index.%s.bundle %s%s/; "%(tmp_target_path, platform, tmp_des_bundle_path, tmp_new_bundle_ver)
+
+    #打包压缩bundlejs
+    cmd="cd %s; mv -v tmp/%s %s/; cd %s; zip %s.dskj %s"%(tmp_target_path, tmp_platform_bundle_name, tmp_new_bundle_ver_path, tmp_new_bundle_ver_path, tmp_platform_bundle_name, tmp_platform_bundle_name)
     ret=os.system(cmd)
     CheckRet(ret, "打BundleJs包失败")
 
     print "##############结束[%s]生成bundlejs文件##############"%platform
     #生成bundlejs差异包
-    DiffPackage(tmp_des_bundle_path, tmp_bunlde_ver_list, tmp_new_bundle_ver, platform)
+    #DiffPackage(tmp_des_bundle_path, tmp_bunlde_ver_list, tmp_new_bundle_ver, platform)
     pass
 
 
@@ -371,34 +418,34 @@ def CompilePrjAndroid():
         tmp_version=os.popen(cmd).readlines()[0][:-1].strip().split()[1].strip('\"')
 
         #只编译生成bundlejs包
-        if not g_args_dict["onlybundlejs"] == True:
-            #清理项目
-            if not g_args_dict["buildonly"] and not g_args_dict["buildpack"] :
-                ret=os.system("cd %s%s/android; ./gradlew clean"%(TARGET_PATH, prj))
-                CheckRet(ret, "project[%s] clean 失败"%prj)
+        # if not g_args_dict["onlybundlejs"] == True:
+        #     #清理项目
+        #     if not g_args_dict["buildonly"] and not g_args_dict["buildpack"] :
+        #         ret=os.system("cd %s%s/android; ./gradlew clean"%(TARGET_PATH, prj))
+        #         CheckRet(ret, "project[%s] clean 失败"%prj)
                 
-                if g_args_dict["cleanonly"] == True:
-                    print "项目【%s】清理完成"%(prj)
-                    continue
-                pass
-            pass
+        #         if g_args_dict["cleanonly"] == True:
+        #             print "项目【%s】清理完成"%(prj)
+        #             continue
+        #         pass
+        #     pass
 
-            #设置metadata.android.json的版本号
-            ret=os.system("sed -i '' 's#minContainerVersion.*,#minContainerVersion\": \"%s\",#g' %s/%s/android/app/src/main/assets/metadata.android.json"%(tmp_version, TARGET_PATH, prj))
-            CheckRet(ret, "项目[%s]metadata.android.json配置修改失败"%prj)
+        #     #设置metadata.android.json的版本号
+        #     ret=os.system("sed -i '' 's#minContainerVersion.*,#minContainerVersion\": \"%s\",#g' %s/%s/android/app/src/main/assets/metadata.android.json"%(tmp_version, TARGET_PATH, prj))
+        #     CheckRet(ret, "项目[%s]metadata.android.json配置修改失败"%prj)
 
-            #开始编译项目
-            ret=os.system("cd %s%s/android; ./gradlew assembleRelease"%(TARGET_PATH, prj))
-            CheckRet(ret, "project[%s] build 失败"%prj)
+        #     #开始编译项目
+        #     ret=os.system("cd %s%s/android; ./gradlew assembleRelease"%(TARGET_PATH, prj))
+        #     CheckRet(ret, "project[%s] build 失败"%prj)
             
-            #开始打包app
-            if not g_args_dict["buildonly"] :
-                #包名称
-                tmp_target_name=("%s_%s"%(prj, tmp_version))
-                tmp_target_path=("%s/package/%s/android/%s/"%(DEST_PATH, prj, tmp_version))
-                PackAndroid(prj, tmp_target_name, tmp_target_path, tmp_version)
-                pass
-            pass
+        #     #开始打包app
+        #     if not g_args_dict["buildonly"] :
+        #         #包名称
+        #         tmp_target_name=("%s_%s"%(prj, tmp_version))
+        #         tmp_target_path=("%s/package/%s/android/%s/"%(DEST_PATH, prj, tmp_version))
+        #         PackAndroid(prj, tmp_target_name, tmp_target_path, tmp_version)
+        #         pass
+        #     pass
         #生成jsbundle
         PackBundleJs(prj, tmp_version, "android")
     pass
