@@ -15,8 +15,8 @@ router.get('/', function(req, res, next) {
 router.get('/updatecode', function(req, res, next) {
   var handleFile = path.join(__dirname, '../handle.py');
   console.log('handleFile====', handleFile);
-
-  process.execFile(handleFile, ['HotUpdateDemo', '--svnupdate'], null,
+  res.socket.timeout(10 * 60 * 1000); //设置超时
+  process.execFile(handleFile, ['DashengChefu', '--svnupdate'], null,
     function (error,stdout,stderr) {
       console.log(stdout);
     if (error !== null) {
@@ -34,8 +34,8 @@ router.get('/updatecode', function(req, res, next) {
 router.get('/bundlejs', function(req, res, next) {
   var handleFile = path.join(__dirname, '../handle.py');
   console.log('handleFile====', handleFile);
-
-  process.execFile(handleFile, ['HotUpdateDemo', '--onlybundlejs'], null,
+  res.socket.timeout(10 * 60 * 1000); //设置超时
+  process.execFile(handleFile, ['DashengChefu', '--onlybundlejs'], null,
     function (error,stdout,stderr) {
     var callRes = stdout;
     if (error !== null) {

@@ -11,7 +11,7 @@ from distutils.version import LooseVersion
 FLAG_FILE_NAME="index.android.js"
 
 #编译目标目录
-TARGET_PATH="~/projects/"
+TARGET_PATH="~/projects/client_dasheng/cilent/trunk/"
 TARGET_PATH=os.path.expanduser(TARGET_PATH)
 
 #生成目标目录
@@ -469,7 +469,7 @@ if __name__ == "__main__":
         pass
 
     if g_args_dict['svnupdate']:
-        tmp_svn_path = '%s%s'%(TARGET_PATH, 'HotUpdateDemo');
+        tmp_svn_path = '%s%s'%(TARGET_PATH, 'DashengChefu');
         HandleSvn('svn up', tmp_svn_path);
         pass
     elif g_args_dict["platform"] == "android|ios":
