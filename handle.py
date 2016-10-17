@@ -11,7 +11,7 @@ from distutils.version import LooseVersion
 FLAG_FILE_NAME="index.android.js"
 
 #编译目标目录
-TARGET_PATH="~//projects/"
+TARGET_PATH="~/projects/"
 TARGET_PATH=os.path.expanduser(TARGET_PATH)
 
 #生成目标目录
@@ -112,12 +112,9 @@ def HandleSvn(svn_type, path, msg=None, newpath=None, version=None, src_path=Non
 # 解析命令参数
 def DoArgParse():
     parser = OptionParser("用法:%prog [-option]")
-    
-    
     parser.add_option("--sendonly",         dest="op_sendonly", action="store_true",    help="可选参数，仅同步到外网")
     parser.add_option("--sendallonly",      dest="op_sendallonly",  action="store_true",    help="可选参数，仅同步到外网，但包含整个package目录")
     parser.add_option("-f", "--forcedelete",    dest="op_forcedelete",  action="store_true",    help="可选参数，是否强制删除外网相关工程的其他包")
-    
     parser.add_option("-c", "--cleanonly",      dest="op_cleanonly",    action="store_true",    help="可选参数，仅清除项目，不编译，不打包")
     parser.add_option("-b", "--buildonly",      dest="op_buildonly",    action="store_true",    help="可选参数，仅编译，不清除，不打包")
     parser.add_option("-p", "--buildpack",      dest="op_buildpack",    action="store_true",    help="可选参数，仅编译打包，不清除")
@@ -125,6 +122,8 @@ def DoArgParse():
     parser.add_option("--md5only",          dest="op_md5only",  action="store_true",    help="可选参数，仅md5包")
     parser.add_option("--onlybundlejs",          dest="op_onlybundlejs",  action="store_true",    help="可选参数，仅生成bundlejs包")
     parser.add_option("--platform", dest="platform",  help="要编译或打包的平台",) 
+    parser.add_option("--svnupdate", dest="svnupdate", action="store_true", help="更新svn代码",)
+
 
     (options, args) = parser.parse_args()
     global g_args_dict
@@ -185,6 +184,13 @@ def DoArgParse():
     else:
         g_args_dict["onlybundlejs"] = False
         pass
+    if options.svnupdate == True:
+        g_args_dict["svnupdate"] = True
+        pass
+    else:
+        g_args_dict["svnupdate"] = False
+        pass
+
 
     if not options.platform:
         g_args_dict["platform"] = "android|ios"
@@ -196,6 +202,8 @@ def DoArgParse():
         CheckRet(-1, "platform 必需为ios || android")
         pass
     pass
+
+
 
 # 筛选编译项目
 def FilterCompilePrj():
@@ -319,7 +327,7 @@ def PackBundleJs(prj, app_version, platform):
 
     #版本号排序
     def comp(x, y):
-        return cmp(LooseVersion(y), LooseVersion(x)) 
+        return cmp(LooseVersion(y), LooseVersion(x))
     tmp_bunlde_ver_list.sort(comp)
 
     #生成的平台bundlejs名称
@@ -454,10 +462,17 @@ def CompilePrjAndroid():
 if __name__ == "__main__":
     CheckEnv()
     DoArgParse()
-    if g_args_dict["buildonly"] or g_args_dict["buildpack"] or g_args_dict["onlybundlejs"]:
+    
+    #在这些命令执行前  要先过滤项目
+    if g_args_dict["svnupdate"] or g_args_dict["buildonly"] or g_args_dict["buildpack"] or g_args_dict["onlybundlejs"]:
         FilterCompilePrj()
         pass
-    if g_args_dict["platform"] == "android|ios":
+
+    if g_args_dict['svnupdate']:
+        tmp_svn_path = '%s%s'%(TARGET_PATH, 'HotUpdateDemo');
+        HandleSvn('svn up', tmp_svn_path);
+        pass
+    elif g_args_dict["platform"] == "android|ios":
         CompilePrjIos()
         CompilePrjAndroid()
         pass
