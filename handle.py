@@ -5,14 +5,19 @@ import sys,os
 from hashlib import md5
 from optparse import OptionParser
 from distutils.version import LooseVersion
+import json
 
 #定义一些常量
 #用于过滤项目的标志
 FLAG_FILE_NAME="index.android.js"
 
 #编译目标目录
-TARGET_PATH="~/projects/client_dasheng/cilent/trunk/"
+TARGET_PATH="~/projects/"
+#client_dasheng/cilent/trunk/
 TARGET_PATH=os.path.expanduser(TARGET_PATH)
+
+#保存最新版本号的json文件
+VERSINO_JSON_FILE=os.path.abspath(".")+"/version.json"
 
 #生成目标目录
 DEST_PATH="~/projects/react-native-pack-update/public"
@@ -309,7 +314,8 @@ def PackBundleJs(prj, app_version, platform):
     tmp_target_path=("%s/package/%s/%s/%s/"%(DEST_PATH, prj, platform, app_version))
     #生成bundle包目录
     tmp_des_bundle_path=("%sbundle/"%(tmp_target_path))
-    print tmp_des_bundle_path
+    print 'tmp_des_bundle_path= %s '%tmp_des_bundle_path
+
     CheckAndCreateDir(tmp_des_bundle_path)
     #删除生成的临时包
     cmd="cd %s; rm -rf tmp; mkdir tmp;"%tmp_target_path
@@ -347,6 +353,7 @@ def PackBundleJs(prj, app_version, platform):
         last_bundle_md5=Md5File("%s/%s/%s"%(tmp_des_bundle_path, tmp_bunlde_ver_list[0], tmp_platform_bundle_name))
         #不相等时，创建新bundle版本号
         if(tmp_new_bundle_md5!=last_bundle_md5) :
+            #版本号加1
             tmp_last_ver_list=tmp_bunlde_ver_list[0].split('.');
             tmp_last_ver=int(tmp_last_ver_list[2])+1
             tmp_last_ver_list[2]=str(tmp_last_ver)
@@ -367,6 +374,26 @@ def PackBundleJs(prj, app_version, platform):
     cmd="cd %s; mv -v tmp/%s %s/; cd %s; zip %s.dskj %s"%(tmp_target_path, tmp_platform_bundle_name, tmp_new_bundle_ver_path, tmp_new_bundle_ver_path, tmp_platform_bundle_name, tmp_platform_bundle_name)
     ret=os.system(cmd)
     CheckRet(ret, "打BundleJs包失败")
+
+    #并更新项目版本json
+    version_json_file=open(VERSINO_JSON_FILE, 'r')
+    version_json_string=version_json_file.read()
+    version_json_file.close()
+
+    version_json=json.loads(version_json_string)
+    #新app版本号
+    version_json["minAppVersion"]=app_version
+    #新的jsbundle版本号
+    version_json["version"]=tmp_new_bundle_ver
+    #新的jsbundle下载地址
+    tmp_download_url="%s/%s/%s/%s/bundle/%s/%s.dskj"%("http://10.8.70.221:3000/package", prj, platform, app_version, tmp_new_bundle_ver, tmp_platform_bundle_name)
+    print tmp_download_url
+    version_json['url']['url']=tmp_download_url
+
+    tmp_target_version_file=("%s/package/%s/%s/version.json"%(DEST_PATH, prj, platform))
+    version_json_file=open(tmp_target_version_file, 'w+')
+    version_json_file.writelines(json.dumps(version_json))
+    version_json_file.close()
 
     print "##############结束[%s]生成bundlejs文件##############"%platform
     #生成bundlejs差异包

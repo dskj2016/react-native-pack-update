@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var versions = require('./routes/versions');
 var serveIndex = require('serve-index')
+var timeout = require('connect-timeout');
 
 var app = express();
 
@@ -22,8 +23,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-//app.use(directory(path.join(__dirname, 'public')));
-app.use('/package', serveIndex(path.join(__dirname, 'public/package')));
+app.use('/package', serveIndex(path.join(__dirname, 'public/package'), {'icons': true}));
+app.use(timeout(5 * 60 * 1000));
 
 app.use('/', routes);
 app.use('/versions', versions);

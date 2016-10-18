@@ -3,13 +3,31 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script type="text/javascript">
+        function clearRes () {
+            document.getElementById("res").innerHTML = '处理中....';
+        }
+    </script>
   </head>
   <body>
-    <a href="/package/">显示包目录</a>
-    <a href="/updatecode">svn更新代码</a>
-    <a href="/bundlejs">bundlejs打包(ios|android)</a>
+    <h1>HotUpdateDemo</h1>
+    <a href="/package/HotUpdateDemo">显示包目录</a>
+    <a href="/updatecode/HotUpdateDemo">svn更新代码</a>
+    <a href="/bundlejs/HotUpdateDemo" onclick="clearRes()">bundlejs打包(ios|android)</a>
     <a href="#"></a>
-    <div><%= res %></div>
+    <br><br>
+    <h1>DashengChefu</h1>
+    <a href="/package/DashengChefu">显示包目录</a>
+    <a href="/updatecode/DashengChefu">svn更新代码</a>
+    <a href="/bundlejs/DashengChefu">bundlejs打包(ios|android)</a>
+    <a href="#"></a>
+    <br><br>
+    <h1>DashengChefuMerchant</h1>
+    <a href="/package/DashengChefuMerchant">显示包目录</a>
+    <a href="/updatecode/DashengChefuMerchant">svn更新代码</a>
+    <a href="/bundlejs/DashengChefuMerchant">bundlejs打包(ios|android)</a>
+    <a href="#"></a>
+    <div id='res'><%= res %></div>
     <!--
     <h1><%= res %></h1>
     <p>Welcome to <%= title %></p>

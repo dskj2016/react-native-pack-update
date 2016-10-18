@@ -2,22 +2,23 @@
 * @Author: keminggu
 * @Date:   2016-09-26 11:41:33
 * @Last Modified by:   keminggu
-* @Last Modified time: 2016-10-17 16:34:25
+* @Last Modified time: 2016-10-18 15:33:47
 */
 
 var express = require('express');
 var router = express.Router();
+var path = require('path');
 
 //获取最新版本号
-router.get('/', function(req, res, next) {
-  res.json({
-    "version": "1.0.24",
-    "minAppVersion": "1.0",
-    "url": {
-      "url": "http://10.8.70.221:3000/package/HotUpdateDemo/ios/1.0/bundle/1.0.3/index.ios.bundle.dskj",
-      "isRelative": false
-    }
-  });
+//projectName: 项目名称
+//platform: 平台名称 ios|android
+router.get('/:projectName/:platform', function(req, res, next) {
+  var projectName = req.params.projectName;
+  var platform = req.params.platform;
+  if (!projectName ||  !platform) {
+    console.log('projectName or platform is null');
+  };
+  res.sendFile(path.join(__dirname, '../public/package/' + projectName + '/' + platform + '/version.json'));
 });
 
 module.exports = router;

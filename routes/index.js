@@ -12,11 +12,11 @@ router.get('/', function(req, res, next) {
 });
 
 //重svn更新代码
-router.get('/updatecode', function(req, res, next) {
+router.get('/updatecode/:projectName', function(req, res, next) {
+  var projectName = req.params.projectName;
   var handleFile = path.join(__dirname, '../handle.py');
   console.log('handleFile====', handleFile);
-  res.socket.timeout(10 * 60 * 1000); //设置超时
-  process.execFile(handleFile, ['DashengChefu', '--svnupdate'], null,
+  process.execFile(handleFile, [projectName, '--svnupdate'], null,
     function (error,stdout,stderr) {
       console.log(stdout);
     if (error !== null) {
@@ -31,11 +31,11 @@ router.get('/updatecode', function(req, res, next) {
 });
 
 //打包bundlejs
-router.get('/bundlejs', function(req, res, next) {
+router.get('/bundlejs/:projectName', function(req, res, next) {
+  var projectName = req.params.projectName;
   var handleFile = path.join(__dirname, '../handle.py');
   console.log('handleFile====', handleFile);
-  res.socket.timeout(10 * 60 * 1000); //设置超时
-  process.execFile(handleFile, ['DashengChefu', '--onlybundlejs'], null,
+  process.execFile(handleFile, [projectName, '--onlybundlejs'], null,
     function (error,stdout,stderr) {
     var callRes = stdout;
     if (error !== null) {
