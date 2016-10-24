@@ -12,8 +12,8 @@ import json
 FLAG_FILE_NAME="index.android.js"
 
 #编译目标目录
-TARGET_PATH="~/projects/"
-#client_dasheng/cilent/trunk/
+TARGET_PATH="~/projects/client_dasheng/cilent/trunk/"
+#
 TARGET_PATH=os.path.expanduser(TARGET_PATH)
 
 #保存最新版本号的json文件
@@ -128,8 +128,8 @@ def DoArgParse():
     parser.add_option("--onlybundlejs",          dest="op_onlybundlejs",  action="store_true",    help="可选参数，仅生成bundlejs包")
     parser.add_option("--platform", dest="platform",  help="要编译或打包的平台",) 
     parser.add_option("--svnupdate", dest="svnupdate", action="store_true", help="更新svn代码",)
-
-
+    parser.add_option("--pngquant", dest="pngquant", action="store_true", help="资源压缩处理",)
+    
     (options, args) = parser.parse_args()
     global g_args_dict
     
@@ -195,7 +195,12 @@ def DoArgParse():
     else:
         g_args_dict["svnupdate"] = False
         pass
-
+    if options.pngquant == True:
+        g_args_dict["pngquant"] = True
+        pass
+    else:
+        g_args_dict["pngquant"] = False
+        pass
 
     if not options.platform:
         g_args_dict["platform"] = "android|ios"
@@ -340,7 +345,7 @@ def PackBundleJs(prj, app_version, platform):
     tmp_platform_bundle_name="index.%s.bundle"%platform
 
     #打android js 包
-    cmd="cd %s%s; react-native bundle —minify --entry-file index.%s.js  --platform %s  --dev false --bundle-output %s/tmp/%s"%(TARGET_PATH, prj, platform, platform, tmp_target_path, tmp_platform_bundle_name)
+    cmd="cd %s%s; react-native bundle —minify --entry-file index.%s.js  --platform %s  --dev false --bundle-output %s/tmp/%s --assets-dest %s/package/%s"%(TARGET_PATH, prj, platform, platform, tmp_target_path, tmp_platform_bundle_name, DEST_PATH, prj)
     print cmd
     ret=os.system(cmd)
     CheckRet(ret, "打BundleJs包失败")
@@ -485,15 +490,35 @@ def CompilePrjAndroid():
         PackBundleJs(prj, tmp_version, "android")
     pass
 
+#Assets资源压缩处理
+def PngquantAssets():
+    print "##############开始压缩处理资源文件##############"
+    for prj in g_compile_project_list:
+        print prj
+        assets_dir="%s%s/src/ui_layer/assets"%(TARGET_PATH, prj)
+        for fpathe, dirs, fs in os.walk(assets_dir):
+            for f in fs:
+                tmp_assets_file=os.path.join(fpathe,f)
+                if os.path.isfile(tmp_assets_file) and os.path.splitext(tmp_assets_file)[1]=='.png':
+                    cmd='%s -f --quality=50-50 %s  --ext .png'%('/Users/gukeming/projects/react-native-pack-update/public/tools/pngquant/pngquant', tmp_assets_file);
+                    ret=os.system(cmd)
+                    pass
+                pass
+        #print assets_dir
+        pass
+    print "##############结束压缩处理资源文件##############"
+    pass
 
 if __name__ == "__main__":
     CheckEnv()
     DoArgParse()
     
     #在这些命令执行前  要先过滤项目
-    if g_args_dict["svnupdate"] or g_args_dict["buildonly"] or g_args_dict["buildpack"] or g_args_dict["onlybundlejs"]:
+    if g_args_dict["pngquant"] or g_args_dict["svnupdate"] or g_args_dict["buildonly"] or g_args_dict["buildpack"] or g_args_dict["onlybundlejs"]:
         FilterCompilePrj()
         pass
+
+    #PngquantAssets()
 
     if g_args_dict['svnupdate']:
         tmp_svn_path = '%s%s'%(TARGET_PATH, 'DashengChefu');
