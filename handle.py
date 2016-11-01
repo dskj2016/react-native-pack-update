@@ -19,7 +19,7 @@ TARGET_PATH=os.path.expanduser(TARGET_PATH)
 #保存最新版本号的json文件
 VERSINO_JSON_FILE=os.path.abspath(".")+"/version.json"
 #下载包地址
-PACKAGE_URL="http://10.8.70.39:3000/package"
+PACKAGE_URL="http://10.8.75.70:3000/package"
 
 #生成目标目录
 DEST_PATH="~/projects/react-native-pack-update/public"
@@ -347,7 +347,8 @@ def PackBundleJs(prj, app_version, platform):
     tmp_platform_bundle_name="index.%s.bundle"%platform
 
     #打android js 包
-    cmd="cd %s%s; react-native bundle —minify --entry-file index.%s.js  --platform %s  --dev false --bundle-output %s/tmp/%s --assets-dest %s/package/%s"%(TARGET_PATH, prj, platform, platform, tmp_target_path, tmp_platform_bundle_name, DEST_PATH, prj)
+    #cmd="cd %s%s; react-native bundle —minify --entry-file index.%s.js  --platform %s  --dev false --bundle-output %s/tmp/%s --assets-dest %s/package/%s"%(TARGET_PATH, prj, platform, platform, tmp_target_path, tmp_platform_bundle_name, DEST_PATH, prj)
+    cmd="cd %s%s; react-native bundle —minify --entry-file index.%s.js  --platform %s  --dev false --bundle-output %s/tmp/%s"%(TARGET_PATH, prj, platform, platform, tmp_target_path, tmp_platform_bundle_name)
     print cmd
     ret=os.system(cmd)
     CheckRet(ret, "打BundleJs包失败")
