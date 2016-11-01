@@ -18,6 +18,8 @@ TARGET_PATH=os.path.expanduser(TARGET_PATH)
 
 #保存最新版本号的json文件
 VERSINO_JSON_FILE=os.path.abspath(".")+"/version.json"
+#下载包地址
+PACKAGE_URL="http://10.8.70.39:3000/package"
 
 #生成目标目录
 DEST_PATH="~/projects/react-native-pack-update/public"
@@ -391,7 +393,7 @@ def PackBundleJs(prj, app_version, platform):
     #新的jsbundle版本号
     version_json["version"]=tmp_new_bundle_ver
     #新的jsbundle下载地址
-    tmp_download_url="%s/%s/%s/%s/bundle/%s/%s.dskj"%("http://10.8.70.221:3000/package", prj, platform, app_version, tmp_new_bundle_ver, tmp_platform_bundle_name)
+    tmp_download_url="%s/%s/%s/%s/bundle/%s/%s.dskj"%(PACKAGE_URL, prj, platform, app_version, tmp_new_bundle_ver, tmp_platform_bundle_name)
     print tmp_download_url
     version_json['url']['url']=tmp_download_url
 
@@ -500,7 +502,7 @@ def PngquantAssets():
             for f in fs:
                 tmp_assets_file=os.path.join(fpathe,f)
                 if os.path.isfile(tmp_assets_file) and os.path.splitext(tmp_assets_file)[1]=='.png':
-                    cmd='%s -f --quality=50-50 %s  --ext .png'%('/Users/gukeming/projects/react-native-pack-update/public/tools/pngquant/pngquant', tmp_assets_file);
+                    cmd='%s -f --quality=50-50 %s  --ext .png'%(os.path.abspath('./public/tools/pngquant/pngquant'), tmp_assets_file);
                     ret=os.system(cmd)
                     pass
                 pass
