@@ -2,7 +2,7 @@
     "apps": [{
         "name": "react-native-pack-update",
         "script": "bin/www",
-        "instances": "1",
+        "instances": "5",
         "node_args"  : "--harmony",
         "log_file"   : "logs/app1.log",
         "error_file" : "logs/app1-err.log",
