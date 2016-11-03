@@ -12,7 +12,7 @@ import json
 FLAG_FILE_NAME="index.android.js"
 
 #编译目标目录
-TARGET_PATH="~/projects/client_dasheng/cilent/trunk/"
+TARGET_PATH="~/workspace/mobile_app/react-native/cilent/trunk/"
 #
 TARGET_PATH=os.path.expanduser(TARGET_PATH)
 
@@ -22,7 +22,7 @@ VERSINO_JSON_FILE=os.path.abspath(".")+"/version.json"
 PACKAGE_URL="http://10.8.75.70:3000/package"
 
 #生成目标目录
-DEST_PATH="~/projects/react-native-pack-update/public"
+DEST_PATH="~/workspace/mobile_app/react-native-pack-update/public"
 DEST_PATH=os.path.expanduser(DEST_PATH)
 
 #切换到文件所在目录
@@ -43,10 +43,10 @@ def CheckEnv():
         pass
 
     # 判断svn和版本
-    ret=os.system("svn --help 1>/dev/null")
-    CheckRet(ret, "svn不存在")
-    ret=os.popen("svn  --version | grep -E \"1\\.9\.*\" | wc -l").readlines()[0][:-1].strip()
-    CheckRet((0 if ret=="1" else -1), "svn版本不正确")
+    # ret=os.system("svn --help 1>/dev/null")
+    # CheckRet(ret, "svn不存在")
+    # ret=os.popen("svn  --version | grep -E \"1\\.9\.*\" | wc -l").readlines()[0][:-1].strip()
+    # CheckRet((0 if ret=="1" else -1), "svn版本不正确")
     
     # 判断是否为tag
     #ret=os.popen("svn info | grep /tag | wc -l").readlines()[0][:-1].strip()
@@ -394,9 +394,10 @@ def PackBundleJs(prj, app_version, platform):
     #新的jsbundle版本号
     version_json["version"]=tmp_new_bundle_ver
     #新的jsbundle下载地址
-    tmp_download_url="%s/%s/%s/%s/bundle/%s/%s.dskj"%(PACKAGE_URL, prj, platform, app_version, tmp_new_bundle_ver, tmp_platform_bundle_name)
+    tmp_download_url="/package/%s/%s/%s/bundle/%s/%s.dskj"%(prj, platform, app_version, tmp_new_bundle_ver, tmp_platform_bundle_name)
     print tmp_download_url
     version_json['url']['url']=tmp_download_url
+    version_json['url']['isRelative']=True
 
     tmp_target_version_file=("%s/package/%s/%s/version.json"%(DEST_PATH, prj, platform))
     version_json_file=open(tmp_target_version_file, 'w+')
